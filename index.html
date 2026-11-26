@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0c1424">
+  <meta name="description" content="미국 Powerball 번호를 무작위로 생성하고 1등 당첨확률과 기대값을 계산해보세요.">
+  <title>Powerball Lab | 파워볼 번호 생성기</title>
+  <style>
+    :root {
+      --bg: #0c1424; --panel: #131f34; --panel2: #17253d; --line: #2c3b54;
+      --text: #f5f7fc; --muted: #9eacc3; --gold: #ffcd68; --red: #f35262;
+      --cyan: #67d6db; --green: #63dfb1;
+    }
+    * {box-sizing:border-box}
+    html {scroll-behavior:smooth}
+    body {margin:0; font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif; color:var(--text); background:var(--bg);line-height:1.55}
+    button,input {font:inherit}
+    button {cursor:pointer}
+    a {color:inherit}
+    .wrap {width:min(1120px,calc(100% - 36px)); margin:auto}
+    header {border-bottom:1px solid rgba(255,255,255,.09); background:rgba(12,20,36,.88)}
+    .header-inner {min-height:77px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .brand {display:flex;align-items:center;gap:11px;font-size:1.13rem;font-weight:900;letter-spacing:.05em;text-decoration:none}
+    .brand-mark {width:37px;height:37px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#ffda80,#ed9b56);color:#182032;font-weight:950;font-size:1.22rem;box-shadow:0 5px 18px rgba(255,185,90,.16)}
+    nav {display:flex;gap:24px;font-size:.9rem;color:#cbd5e5}
+    nav a{text-decoration:none} nav a:hover {color:var(--gold)}
+    .hero {padding:75px 0 41px;position:relative;overflow:hidden}
+    .hero:before {content:"";position:absolute;width:700px;height:500px;right:-230px;top:-240px;background:radial-gradient(ellipse,rgba(74,117,210,.18),transparent 65%);pointer-events:none}
+    .eyebrow {font-size:.73rem;letter-spacing:.16em;font-weight:800;color:var(--cyan);display:inline-flex;gap:8px;align-items:center}
+    .dot {width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+    h1 {font-size:clamp(2.2rem,5vw,4rem);line-height:1.2;letter-spacing:-.065em;margin:17px 0 19px;font-weight:850}
+    h1 em{font-style:normal;color:var(--gold)}
+    .hero p {color:#b6c2d7;max-width:660px;margin:0;font-size:1.02rem;word-break:keep-all}
+    .mini-tags{display:flex;gap:9px;flex-wrap:wrap;margin-top:23px}
+    .mini-tags span{border:1px solid #334158;color:#b9c5d8;font-size:.79rem;border-radius:30px;padding:5px 12px}
+    .main-grid {display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:20px;align-items:stretch}
+    .panel{background:linear-gradient(145deg,#192740,#111c30);border:1px solid #2b3b55;border-radius:22px;padding:28px;box-shadow:0 13px 28px rgba(0,0,0,.1)}
+    .section-title {font-size:1.21rem;font-weight:780;letter-spacing:-.035em;margin:0}
+    .sub{color:var(--muted);font-size:.87rem;margin:7px 0 0}
+    .section-head {display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .mini-pill {padding:5px 10px;border-radius:20px;font-size:.71rem;color:var(--cyan);border:1px solid #31576b;white-space:nowrap}
+    .ball-area {margin:36px 0 29px;padding:29px 12px;border-radius:17px;background:rgba(4,10,21,.27);border:1px solid #2e405a;text-align:center}
+    .ball-row {display:flex;align-items:center;justify-content:center;gap:clamp(5px,1vw,13px)}
+    .ball {flex:0 0 auto;width:clamp(39px,5.25vw,65px);height:clamp(39px,5.25vw,65px);border-radius:50%;display:grid;place-items:center;font-size:clamp(.96rem,1.8vw,1.38rem);font-weight:880;box-shadow:inset -4px -6px 9px rgba(0,0,0,.1),0 8px 18px rgba(0,0,0,.2);background:linear-gradient(145deg,#fff,#d4dded);color:#223450;font-variant-numeric:tabular-nums}
+    .ball.red {background:linear-gradient(145deg,#ff7582,#db3348);color:#fff;box-shadow:inset -4px -6px 9px rgba(122,6,24,.2),0 8px 18px rgba(195,47,73,.18)}
+    .ball-divider{width:1px;height:33px;background:#4c5b74;margin:0 4px;flex-shrink:0}
+    .ball.pop {animation:pop .4s cubic-bezier(.22,1.4,.43,1) both}
+    @keyframes pop {from {opacity:0;transform:translateY(13px) scale(.65)}to {opacity:1;transform:translateY(0) scale(1)}}
+    .balls-caption{display:flex;justify-content:space-around;color:#8092ad;font-size:.74rem;margin-top:19px}
+    .buttons{display:flex;gap:10px}
+    .primary{flex:1;border:0;color:#172237;font-weight:850;background:linear-gradient(135deg,#ffd876,#ffb95b);border-radius:13px;padding:15px 14px;transition:transform .16s,filter .16s}
+    .primary:hover{filter:brightness(1.05);transform:translateY(-1px)}
+    .secondary{border:1px solid #44526a;border-radius:13px;background:#202f49;color:#e8eef8;padding:15px 18px;font-weight:700}
+    .secondary:disabled {opacity:.45;cursor:not-allowed}
+    .footnote {font-size:.75rem;color:#8495af;margin:17px 0 0}
+    .metric-label {font-size:.81rem;font-weight:700;color:#b8c5dc;margin:23px 0 6px}
+    .big-odds {font-size:clamp(1.7rem,3.2vw,2.55rem);font-weight:850;letter-spacing:-.06em;line-height:1.2;white-space:nowrap;font-variant-numeric:tabular-nums}
+    .big-odds span{color:var(--gold)}
+    .tiny {color:#91a1b8;font-size:.77rem}
+    .rule{height:1px;background:#334158;margin:25px 0}
+    .info-line {display:flex;align-items:center;justify-content:space-between;gap:12px;margin:17px 0;color:#b8c5d8;font-size:.88rem}
+    .info-line strong{color:#fff;font-size:.99rem}
+    .prob-bar{margin-top:20px;height:7px;border-radius:10px;background:#35425a;overflow:hidden}
+    .prob-bar div{height:100%;width:6%;border-radius:10px;background:linear-gradient(90deg,var(--gold),var(--red))}
+    .full-note {margin-top:14px;padding:13px 14px;border-radius:12px;background:#25364d;color:#bcc9db;font-size:.79rem;word-break:keep-all}
+    .bottom-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:20px;margin-top:20px;align-items:start}
+    .calc-top {display:flex;align-items:start;justify-content:space-between;gap:10px}
+    .input-label {font-size:.87rem;color:#c6d2e4;display:block;margin:23px 0 9px;font-weight:680}
+    .input-wrap{display:flex;align-items:center;background:#0c172a;border:1px solid #40506d;border-radius:12px;overflow:hidden;max-width:100%}
+    .input-wrap span{color:var(--gold);padding-left:17px;font-size:1.05rem;font-weight:800}
+    .input-wrap input{width:100%;background:transparent;border:0;color:#fff;font-weight:750;padding:13px 15px;font-size:1.04rem;outline:0;min-width:0}
+    .input-wrap:focus-within{border-color:#f5c974;box-shadow:0 0 0 3px rgba(245,201,116,.1)}
+    input[type=range]{width:100%;margin-top:18px;accent-color:var(--gold)}
+    .range-ends{display:flex;justify-content:space-between;color:#8695ae;font-size:.73rem}
+    .calc-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+    .calc-box{background:#0d192c;border:1px solid #293e57;border-radius:13px;padding:17px 15px}
+    .calc-box.highlight{grid-column:1/-1;background:linear-gradient(110deg,#24384e,#18283c);border-color:#465a69}
+    .calc-box span{display:block;color:#9faec4;font-size:.78rem}
+    .calc-box strong{display:block;margin-top:7px;font-size:1.26rem;letter-spacing:-.045em;white-space:nowrap;font-variant-numeric:tabular-nums}
+    .calc-box.highlight strong {font-size:1.67rem}
+    .calc-box strong.negative {color:#ff8995}
+    .calc-box strong.positive {color:var(--green)}
+    .calc-note{color:#8f9fb6;font-size:.77rem;margin:15px 0 0;line-height:1.7;word-break:keep-all}
+    .history-list{display:flex;flex-direction:column;gap:10px;margin-top:24px}
+    .history-empty{color:#8fa1ba;font-size:.85rem;text-align:center;padding:35px 10px;border:1px dashed #3a4c67;border-radius:13px}
+    .history-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:13px;border:1px solid #33445e;border-radius:12px;background:#101e32}
+    .history-item .count{color:#8294b0;font-size:.74rem;white-space:nowrap}
+    .history-numbers{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;align-items:center;font-variant-numeric:tabular-nums}
+    .chip{font-size:.74rem;font-weight:800;border-radius:8px;padding:3px 6px;background:#d9e3f0;color:#27344b;min-width:23px;text-align:center}
+    .chip.red{background:#e64758;color:#fff}
+    .table-section{margin:42px 0 55px}
+    .table-shell{margin-top:17px;overflow-x:auto;border:1px solid #2b3b55;border-radius:17px;background:#131f34}
+    table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:480px}
+    th,td{text-align:left;padding:12px 18px;border-bottom:1px solid #283851}
+    th{font-size:.78rem;color:#92a8c8;background:#1e2d45;font-weight:750}
+    td:nth-child(2),td:nth-child(3){font-variant-numeric:tabular-nums}
+    tr:last-child td{border-bottom:0}
+    tr:first-child td{color:var(--gold);font-weight:780}
+    .source-line{font-size:.76rem;color:#92a1b8;margin:14px 0 0;line-height:1.7}
+    .source-line a{color:var(--cyan)}
+    footer{border-top:1px solid #293751;padding:25px 0 34px;color:#7889a1;font-size:.77rem}
+    footer .wrap {display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    @media(max-width:800px){.main-grid,.bottom-grid{grid-template-columns:1fr}.hero{padding:49px 0 30px}.panel{padding:23px}.ball{width:clamp(40px,10vw,61px);height:clamp(40px,10vw,61px)}}
+    @media(max-width:440px){.wrap{width:min(100% - 26px,1120px)}nav{gap:12px;font-size:.78rem;white-space:nowrap}nav a:last-child{display:none}.brand{font-size:.96rem}.brand-mark{width:32px;height:32px}.panel{padding:18px}.ball-area{padding:23px 7px}.ball{width:clamp(34px,9.5vw,45px);height:clamp(34px,9.5vw,45px);font-size:.93rem}.ball-divider{margin:0 1px}.buttons{flex-wrap:wrap}.secondary{flex:0 0 auto;padding:13px 14px}.calc-box strong{font-size:1.07rem}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap header-inner">
+      <a class="brand" href="#top" aria-label="Powerball Lab 맨 위로"><span class="brand-mark">P</span> POWERBALL <span style="color:var(--gold)">LAB</span></a>
+      <nav aria-label="페이지 메뉴"><a href="#generator">번호 생성</a><a href="#expected">기대값 계산</a><a href="#prizes">당첨 구조</a></nav>
+    </div>
+  </header>
+
+  <main id="top" class="wrap">
+    <section class="hero">
+      <span class="eyebrow"><span class="dot"></span> RANDOM NUMBER GENERATOR</span>
+      <h1>한 번의 클릭으로<br><em>나만의 파워볼 번호.</em></h1>
+      <p>미국 Powerball 공식 번호 범위를 기준으로 번호 6개를 무작위 생성합니다. 1등 확률과 수학적 기대값까지 한 화면에서 확인해보세요.</p>
+      <div class="mini-tags"><span>흰색 공 5개 · 1~69</span><span>빨간 공 1개 · 1~26</span><span>기본 1회 $2</span></div>
+    </section>
+
+    <div class="main-grid">
+      <section class="panel" id="generator" aria-labelledby="generate-title">
+        <div class="section-head"><div><h2 class="section-title" id="generate-title">행운의 번호 생성</h2><p class="sub">흰색 공 5개는 중복 없이 선택되며 오름차순으로 표시됩니다.</p></div><span class="mini-pill">AUTO PICK</span></div>
+        <div class="ball-area">
+          <div id="numberBalls" class="ball-row" aria-live="polite" aria-label="생성된 파워볼 번호">
+            <span class="ball">?</span><span class="ball">?</span><span class="ball">?</span><span class="ball">?</span><span class="ball">?</span><span class="ball-divider" aria-hidden="true"></span><span class="ball red">?</span>
+          </div>
+          <div class="balls-caption"><span>WHITE BALLS · 5개</span><span>POWERBALL · 1개</span></div>
+        </div>
+        <div class="buttons"><button class="primary" id="generateBtn" type="button">✦ 번호 생성하기</button><button class="secondary" id="copyBtn" type="button" disabled>번호 복사</button></div>
+        <p class="footnote" id="generationInfo" aria-live="polite">버튼을 누르면 새로운 조합이 생성됩니다.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="odds-title">
+        <div class="section-head"><h2 class="section-title" id="odds-title">1등 당첨확률</h2><span class="mini-pill">OFFICIAL ODDS</span></div>
+        <p class="metric-label">잭팟 당첨 확률</p>
+        <div class="big-odds">1 <span>/</span> 292,201,338</div>
+        <p class="tiny">약 0.0000003422% · 모든 번호 조합에서 동일</p>
+        <div class="rule"></div>
+        <div class="info-line"><span>흰색 공 5개 모두 적중</span><strong>1~69</strong></div>
+        <div class="info-line"><span>빨간 Powerball 적중</span><strong>1~26</strong></div>
+        <div class="info-line"><span>전체 가능한 조합 수</span><strong>292,201,338개</strong></div>
+        <div class="info-line"><span>아무 등수라도 당첨될 확률</span><strong>약 1 / 24.87</strong></div>
+        <div class="prob-bar" aria-hidden="true"><div></div></div>
+        <div class="full-note">어떤 번호를 선택하든 1등 확률은 같습니다. 과거 번호나 생성 횟수는 미래 추첨 확률을 높이지 않습니다.</div>
+      </section>
+    </div>
+
+    <div class="bottom-grid">
+      <section class="panel" id="expected" aria-labelledby="ev-title">
+        <div class="calc-top"><div><h2 class="section-title" id="ev-title">수학적 기대값 계산기</h2><p class="sub">1게임의 평균적인 수익·손실을 확률로 계산합니다.</p></div><span class="mini-pill">EXPECTED VALUE</span></div>
+        <label class="input-label" for="jackpot">1등 당첨금의 현금 지급액 가정 (USD)</label>
+        <div class="input-wrap"><span>$</span><input id="jackpot" type="number" min="0" max="1000000000000" step="1000000" value="100000000" inputmode="numeric" aria-describedby="jackpotHelp"></div>
+        <input id="jackpotRange" type="range" min="0" max="1000000000" step="10000000" value="100000000" aria-label="1등 당첨금 현금 지급액 조절">
+        <div class="range-ends"><span>$0</span><span>$10억 (1 Billion)</span></div>
+        <div class="calc-metrics">
+          <div class="calc-box"><span>1회 참가비</span><strong>$2.00</strong></div>
+          <div class="calc-box"><span>평균 당첨금 (총 기대수령액)</span><strong id="grossEV">$0.00</strong></div>
+          <div class="calc-box highlight"><span>1게임당 순기대값 · 참가비 차감</span><strong id="netEV" class="negative">-$0.00</strong></div>
+          <div class="calc-box"><span>이론적 회수율</span><strong id="returnRate">0.0%</strong></div>
+          <div class="calc-box"><span>손익분기 1등 현금 당첨금</span><strong id="breakEven">$0</strong></div>
+        </div>
+        <p class="calc-note" id="jackpotHelp">계산식: (입력한 1등 현금 지급액 × 1등 확률) + 나머지 8개 등수의 확률가중 당첨금 − $2. 공식 발표 잭팟은 보통 장기 분할지급 금액이므로, 현금 일시수령액을 입력해야 비교가 더 적절합니다.</p>
+        <p class="calc-note">※ 세금·공동 1등 당첨으로 인한 분할·실제 지급 규정의 예외·물가/시간가치·Power Play는 반영하지 않습니다. 캘리포니아는 하위 상금이 판매량·당첨자 수에 따라 변동할 수 있습니다. 본 계산은 수학적 예시이며 당첨을 보장하지 않습니다.</p>
+      </section>
+      <section class="panel" aria-labelledby="history-title"><div class="section-head"><h2 class="section-title" id="history-title">최근 생성 번호</h2><span class="mini-pill" id="generatedCounter">0회 생성</span></div><p class="sub">최근 5개 조합을 이 페이지에서 확인할 수 있습니다.</p><div class="history-list" id="historyList"><div class="history-empty">아직 생성한 번호가 없습니다.<br>번호 생성 버튼을 눌러보세요.</div></div></section>
+    </div>
+
+    <section class="table-section" id="prizes" aria-labelledby="prize-title"><h2 class="section-title" id="prize-title">Powerball 등수별 당첨금과 확률</h2><p class="sub">기본 게임 ($2), Power Play 제외 · 일반적인 미국 고정 상금 기준</p>
+      <div class="table-shell"><table><thead><tr><th scope="col">맞힌 번호</th><th scope="col">당첨금</th><th scope="col">당첨 확률</th></tr></thead><tbody>
+        <tr><td>흰 공 5개 + 파워볼</td><td>잭팟 (변동)</td><td>1 / 292,201,338</td></tr>
+        <tr><td>흰 공 5개</td><td>$1,000,000</td><td>1 / 11,688,053.52</td></tr>
+        <tr><td>흰 공 4개 + 파워볼</td><td>$50,000</td><td>1 / 913,129.18</td></tr>
+        <tr><td>흰 공 4개</td><td>$100</td><td>1 / 36,525.17</td></tr>
+        <tr><td>흰 공 3개 + 파워볼</td><td>$100</td><td>1 / 14,494.11</td></tr>
+        <tr><td>흰 공 3개</td><td>$7</td><td>1 / 579.76</td></tr>
+        <tr><td>흰 공 2개 + 파워볼</td><td>$7</td><td>1 / 701.33</td></tr>
+        <tr><td>흰 공 1개 + 파워볼</td><td>$4</td><td>1 / 91.98</td></tr>
+        <tr><td>파워볼만</td><td>$4</td><td>1 / 38.32</td></tr>
+      </tbody></table></div>
+      <p class="source-line">자료: <a href="https://www.powerball.com/powerball-prize-chart" target="_blank" rel="noopener noreferrer">Powerball 공식 등수별 상금·당첨확률표 ↗</a>. 비공식 교육용 웹페이지로, 실제 복권 구매 기능이나 공식 추첨 시스템과는 연결되어 있지 않습니다.</p>
+    </section>
+  </main>
+  <footer><div class="wrap"><span>© Powerball Lab · 교육 목적의 독립 프로젝트</span><span>확률을 이해하고 책임감 있게 이용하세요.</span></div></footer>
+
+  <script>
+    'use strict';
+    const TOTAL = 292201338;
+    const TICKET_COST = 2;
+    const tickets = [];
+    let drawCount = 0;
+
+    // C(69,5) × 26가지의 동일한 확률을 적용한다.
+    function combinations(n, k) {
+      let result = 1;
+      for (let i = 1; i <= k; i++) result = result * (n - k + i) / i;
+      return Math.round(result);
+    }
+
+    // 공식 9개 당첨 등수. 최종 확률 계산에는 반올림된 역확률 대신 정확한 조합수를 사용한다.
+    const prizeTiers = [
+      { whites: 5, powerball: true, payout: null },
+      { whites: 5, powerball: false, payout: 1000000 },
+      { whites: 4, powerball: true, payout: 50000 },
+      { whites: 4, powerball: false, payout: 100 },
+      { whites: 3, powerball: true, payout: 100 },
+      { whites: 3, powerball: false, payout: 7 },
+      { whites: 2, powerball: true, payout: 7 },
+      { whites: 1, powerball: true, payout: 4 },
+      { whites: 0, powerball: true, payout: 4 }
+    ];
+    function tierOutcomes(tier) {
+      return combinations(5, tier.whites) * combinations(64, 5 - tier.whites) * (tier.powerball ? 1 : 25);
+    }
+    const lowerTierEV = prizeTiers.slice(1).reduce((sum, tier) => sum + tier.payout * tierOutcomes(tier) / TOTAL, 0);
+    const breakEvenCashJackpot = (TICKET_COST - lowerTierEV) * TOTAL;
+
+    const usd = value => new Intl.NumberFormat('en-US', {style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(value);
+    const usdWhole = value => new Intl.NumberFormat('en-US', {style:'currency',currency:'USD',maximumFractionDigits:0}).format(value);
+    const $ = id => document.getElementById(id);
+
+    // 브라우저의 암호학적 난수로 0 이상 maxExclusive 미만 정수를 편향 없이 생성한다.
+    function secureRandom(maxExclusive) {
+      if (!Number.isInteger(maxExclusive) || maxExclusive <= 0) throw new Error('잘못된 난수 범위');
+      const bound = 4294967296;
+      const limit = Math.floor(bound / maxExclusive) * maxExclusive;
+      const buffer = new Uint32Array(1);
+      let value;
+      do {crypto.getRandomValues(buffer); value = buffer[0];} while (value >= limit);
+      return value % maxExclusive;
+    }
+    function generateNumbers() {
+      const pool = Array.from({length:69},(_,i)=>i+1);
+      // 부분 Fisher–Yates 셔플: 같은 번호를 두 번 선택하지 않는다.
+      for (let i=0;i<5;i++) {
+        const j = i + secureRandom(69-i);
+        [pool[i],pool[j]] = [pool[j],pool[i]];
+      }
+      return {white:pool.slice(0,5).sort((a,b)=>a-b),red:secureRandom(26)+1};
+    }
+    function showBalls(result) {
+      const root = $('numberBalls');
+      root.replaceChildren();
+      result.white.forEach((number,i)=>{
+        const ball=document.createElement('span');ball.className='ball pop';ball.style.animationDelay=(i*55)+'ms';ball.textContent=String(number).padStart(2,'0');root.appendChild(ball);
+      });
+      const separator=document.createElement('span');separator.className='ball-divider';separator.setAttribute('aria-hidden','true');root.appendChild(separator);
+      const red=document.createElement('span');red.className='ball red pop';red.style.animationDelay='310ms';red.textContent=String(result.red).padStart(2,'0');root.appendChild(red);
+      root.setAttribute('aria-label','흰색 번호 '+result.white.join(', ')+' / 파워볼 '+result.red);
+    }
+    function showHistory() {
+      const root=$('historyList');root.replaceChildren();
+      tickets.forEach(item=>{
+        const line=document.createElement('div');line.className='history-item';
+        const count=document.createElement('span');count.className='count';count.textContent='#'+item.sequence;
+        const balls=document.createElement('div');balls.className='history-numbers';
+        item.white.forEach(n=>{const chip=document.createElement('span');chip.className='chip';chip.textContent=String(n).padStart(2,'0');balls.appendChild(chip)});
+        const red=document.createElement('span');red.className='chip red';red.textContent=String(item.red).padStart(2,'0');balls.appendChild(red);
+        line.append(count,balls);root.appendChild(line);
+      });
+      $('generatedCounter').textContent=drawCount+'회 생성';
+    }
+    $('generateBtn').addEventListener('click',()=>{
+      const result=generateNumbers();drawCount++;
+      tickets.unshift({...result,sequence:drawCount});if(tickets.length>5)tickets.pop();
+      showBalls(result);showHistory();$('copyBtn').disabled=false;
+      $('generationInfo').textContent=drawCount+'번째 조합이 생성되었습니다. 각 조합의 당첨확률은 동일합니다.';
+    });
+    $('copyBtn').addEventListener('click',async()=>{
+      if(!tickets.length)return;
+      const ticket=tickets[0];const value=ticket.white.join(', ')+' | Powerball: '+ticket.red;
+      try {
+        if(navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(value);
+        else {const textarea=document.createElement('textarea');textarea.value=value;textarea.style.position='fixed';textarea.style.left='-9999px';document.body.appendChild(textarea);textarea.select();if(!document.execCommand('copy'))throw new Error('copy');textarea.remove();}
+        $('generationInfo').textContent='번호가 클립보드에 복사되었습니다.';
+      }catch(error){$('generationInfo').textContent='복사할 번호: '+value;}
+    });
+    function updateExpectedValue() {
+      const input=$('jackpot');const raw=Number(input.value);
+      const jackpot=Number.isFinite(raw)?Math.min(1000000000000,Math.max(0,raw)):0;
+      const gross=lowerTierEV+jackpot/TOTAL;
+      const net=gross-TICKET_COST;
+      $('grossEV').textContent=usd(gross);
+      const netEl=$('netEV');netEl.textContent=(net<0?'-':'+')+usd(Math.abs(net));
+      netEl.className=net<0?'negative':'positive';
+      $('returnRate').textContent=(gross/TICKET_COST*100).toLocaleString('ko-KR',{maximumFractionDigits:1,minimumFractionDigits:1})+'%';
+      $('breakEven').textContent=usdWhole(Math.ceil(breakEvenCashJackpot));
+      $('jackpotRange').value=Math.min(1000000000,jackpot);
+    }
+    $('jackpot').addEventListener('input',updateExpectedValue);
+    $('jackpot').addEventListener('change',()=>{$('jackpot').value=Math.min(1000000000000,Math.max(0,Number($('jackpot').value)||0));updateExpectedValue()});
+    $('jackpotRange').addEventListener('input',event=>{$('jackpot').value=event.target.value;updateExpectedValue()});
+    updateExpectedValue();
+  </script>
+</body>
+</html>
